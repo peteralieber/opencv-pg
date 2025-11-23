@@ -103,6 +103,11 @@ class Choice(Param):
         choice_list = choices or options or []
         self.choices = choice_list if isinstance(choice_list, list) else list(choice_list)
         self.options_map = options_map  # For mapping display names to values
+    
+    @property
+    def options(self):
+        """Alias for choices for backward compatibility"""
+        return self.choices
 
 
 class Bool(Param):
