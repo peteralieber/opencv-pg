@@ -22,7 +22,7 @@ class Param:
         help_text (str, optional): Tooltip text to display. Default is ''.
     """
     
-    def __init__(self, default=None, label=None, read_only=False, help_text=""):
+    def __init__(self, default=None, label=None, read_only=False, help_text="", fmt_str=None, **kwargs):
         super().__init__()
         self.label = label
         self._value = None
@@ -30,6 +30,8 @@ class Param:
         self._transform = None
         self.help_text = help_text
         self.read_only = read_only
+        self.fmt_str = fmt_str  # Format string for displaying value
+        # Ignore any other kwargs for compatibility
     
     def _store_value_and_start(self, value):
         """Store the changed value and run the pipeline
@@ -69,7 +71,9 @@ class FloatSlider(Param):
 class IntPairSlider(Param):
     """Pair of integer sliders"""
     
-    def __init__(self, default, min_val, max_val, step=1, editable_range=False, **kwargs):
+    def __init__(self, default=None, min_val=0, max_val=100, step=1, editable_range=False, **kwargs):
+        if default is None:
+            default = (min_val, max_val)
         super().__init__(default=default, **kwargs)
         self.min_val = min_val
         self.max_val = max_val
@@ -80,7 +84,9 @@ class IntPairSlider(Param):
 class FloatPairSlider(Param):
     """Pair of float sliders"""
     
-    def __init__(self, default, min_val, max_val, step=0.1, editable_range=False, **kwargs):
+    def __init__(self, default=None, min_val=0.0, max_val=1.0, step=0.1, editable_range=False, **kwargs):
+        if default is None:
+            default = (min_val, max_val)
         super().__init__(default=default, **kwargs)
         self.min_val = min_val
         self.max_val = max_val
@@ -91,9 +97,12 @@ class FloatPairSlider(Param):
 class Choice(Param):
     """Dropdown choice parameter"""
     
-    def __init__(self, default, choices, **kwargs):
+    def __init__(self, default=None, choices=None, options=None, options_map=None, **kwargs):
         super().__init__(default=default, **kwargs)
-        self.choices = choices if isinstance(choices, list) else list(choices)
+        # Support both 'choices' and 'options' for compatibility
+        choice_list = choices or options or []
+        self.choices = choice_list if isinstance(choice_list, list) else list(choice_list)
+        self.options_map = options_map  # For mapping display names to values
 
 
 class Bool(Param):
@@ -106,20 +115,24 @@ class Bool(Param):
 class IntInput(Param):
     """Integer input parameter"""
     
-    def __init__(self, default, min_val=None, max_val=None, **kwargs):
+    def __init__(self, default=0, min_val=None, max_val=None, step=1, unit_type=None, **kwargs):
         super().__init__(default=default, **kwargs)
         self.min_val = min_val
         self.max_val = max_val
+        self.step = step
+        self.unit_type = unit_type
 
 
 class FloatInput(Param):
     """Float input parameter"""
     
-    def __init__(self, default, min_val=None, max_val=None, decimals=2, **kwargs):
+    def __init__(self, default=0.0, min_val=None, max_val=None, decimals=2, step=0.1, unit_type=None, **kwargs):
         super().__init__(default=default, **kwargs)
         self.min_val = min_val
         self.max_val = max_val
         self.decimals = decimals
+        self.step = step
+        self.unit_type = unit_type
 
 
 class Color(Param):
@@ -140,9 +153,18 @@ class Text(Param):
 class Array2D(Param):
     """2D array parameter (kernel, structuring element, etc.)"""
     
-    def __init__(self, default, use_anchor=True, **kwargs):
+    def __init__(self, default=None, use_anchor=True, use_struct=False, dims=2, editable_array=True, **kwargs):
+        # Set default array if none provided
+        if default is None:
+            if dims == 1:
+                default = np.array([1, 1, 1])
+            else:
+                default = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
         super().__init__(default=default, **kwargs)
         self.use_anchor = use_anchor
+        self.use_struct = use_struct  # Whether this is a structuring element
+        self.dims = dims  # 1D or 2D array
+        self.editable_array = editable_array  # Whether user can edit the array
         if default is not None:
             self._value = np.array(default)
         else:
@@ -152,9 +174,13 @@ class Array2D(Param):
 class Array1D(Param):
     """1D array parameter"""
     
-    def __init__(self, default, use_anchor=False, **kwargs):
+    def __init__(self, default=None, use_anchor=False, dims=1, **kwargs):
+        # Set default array if none provided
+        if default is None:
+            default = np.array([1, 1, 1])
         super().__init__(default=default, **kwargs)
         self.use_anchor = use_anchor
+        self.dims = dims
         if default is not None:
             self._value = np.array(default)
         else:
@@ -175,6 +201,15 @@ class Point(Param):
     
     def __init__(self, default=(0, 0), **kwargs):
         super().__init__(default=default, **kwargs)
+
+
+class Dimensions2D(Param):
+    """2D dimensions parameter (width, height)"""
+    
+    def __init__(self, default=(100, 100), min_val=1, max_val=1000, **kwargs):
+        super().__init__(default=default, **kwargs)
+        self.min_val = min_val
+        self.max_val = max_val
 
 
 # Aliases for backward compatibility with Qt version
