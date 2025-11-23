@@ -4,8 +4,6 @@ import traceback
 import numpy as np
 import copy
 
-from qtpy import QtCore
-
 from .params import Param
 
 log = logging.getLogger(__name__)
@@ -237,7 +235,6 @@ class BaseTransform(metaclass=DeclarativeFieldBase):
 
         return img_out, extra_out
 
-    @QtCore.Slot(bool)
     def handle_enabled_changed(self, enabled):
         """Sets whether transform should be enabled then reruns pipeline
 

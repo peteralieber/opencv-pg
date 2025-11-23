@@ -5,7 +5,6 @@ from . import params
 from . import cv2_constants as cvc
 from . import support_transforms as supt
 
-from qtpy import QtWidgets, QtCore
 import cv2
 import numpy as np
 
@@ -143,16 +142,9 @@ class Split(BaseTransform):
 
     def get_info_widget(self):
         """Adds labels centered under the images describing the channel"""
-        wid = QtWidgets.QWidget()
-        layout = QtWidgets.QHBoxLayout()
-        left = QtWidgets.QLabel("Blue Channel", alignment=QtCore.Qt.AlignLeft)
-        mid = QtWidgets.QLabel("Green Channel", alignment=QtCore.Qt.AlignCenter)
-        right = QtWidgets.QLabel("Red Channel", alignment=QtCore.Qt.AlignRight)
-        layout.addWidget(left)
-        layout.addWidget(mid)
-        layout.addWidget(right)
-        wid.setLayout(layout)
-        return wid
+        # NOTE: This was a Qt-specific widget. For ImGui, return None.
+        # The info can be shown in a different way in the ImGui interface.
+        return None
 
 
 class Merge(BaseTransform):
@@ -449,14 +441,8 @@ class Remap(BaseTransform):
             self._border_val.set_enabled(False)
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "Apply the mapping functions: \n"
-            "map1(x,y)=x+r*cos(theta*x/num_cols) \n"
-            "map2(x,y)=y+r*cos(theta*y/num_rows) ",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
         num_rows = img_in.shape[1]
@@ -549,11 +535,11 @@ class BoxFilter(BaseTransform):
             ar = np.ones((rows, cols))
         self._kernel.widget.array.model().set_internal_model_data(ar)
 
-    @QtCore.Slot(int, int)
+    
     def _handle_dimensions_changed(self, rows, cols):
         self.common_handler(rows, cols)
 
-    @QtCore.Slot(int)
+    
     def _handle_checkbox_changed(self, state):
         rows, cols = self.kernel.shape
         self.common_handler(rows, cols)
@@ -650,14 +636,8 @@ class InRange(BaseTransform):
     ch3 = params.SliderPairParam(min_val=0, max_val=255)
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "Since inRange returns what is effectively a bitmask, we can "
-            "combine it with a preceeding cvtColor and then trailing bitwise_and "
-            "to filter by color, which is done here.",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def update_widgets_state(self):
         """Update the widget labels to the proper color map"""
@@ -887,12 +867,8 @@ class FindContours(BaseTransform):
     )
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "We first apply a threshold to the image before searching for contours. ",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
 
@@ -916,12 +892,8 @@ class GetGaussianKernel(BaseTransform):
     sigma = params.FloatSlider(min_val=-1.0, max_val=31.0, default=13.0, step=0.005)
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "This display is showing the 1D Gaussian kernel as a vertical image. ",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
         out = cv2.getGaussianKernel(ksize=self.k_size, sigma=self.sigma)
@@ -951,12 +923,8 @@ class MatchTemplate(BaseTransform):
     )
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "Selected template shown in red. \nBest template match shown in blue.",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
 
@@ -1038,13 +1006,8 @@ class CornerEigenValsAndVecs(BaseTransform):
     )
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "This display is using the eigenvalues returned and a threshold "
-            "value to build a corner detector. See the OpenCV tutorial for details. ",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
         img = supt.make_gray(img_in)
@@ -1097,9 +1060,8 @@ class PyrDown(BaseTransform):
             "The first image is the original. Each successive image is a "
             "reduction by 1/2 of the previous images dimensions"
         )
-        label = QtWidgets.QLabel(text, alignment=QtCore.Qt.AlignCenter)
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
     def draw(self, img_in, extra_in):
         pyramid = []
@@ -1146,12 +1108,8 @@ class FillPoly(BaseTransform):
         return out
 
     def get_info_widget(self):
-        label = QtWidgets.QLabel(
-            "The points shown below are those that define the shape seen",
-            alignment=QtCore.Qt.AlignCenter,
-        )
-        label.setWordWrap(True)
-        return label
+        # NOTE: Qt-specific widget removed for ImGui compatibility
+        return None
 
 
 class Transform(BaseTransform):
