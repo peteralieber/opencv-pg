@@ -535,11 +535,11 @@ class BoxFilter(BaseTransform):
             ar = np.ones((rows, cols))
         self._kernel.widget.array.model().set_internal_model_data(ar)
 
-    
+    # NOTE: These methods were Qt widget event handlers. With ImGui, they may not be used
+    # but are kept for compatibility. They can be called programmatically if needed.
     def _handle_dimensions_changed(self, rows, cols):
         self.common_handler(rows, cols)
 
-    
     def _handle_checkbox_changed(self, state):
         rows, cols = self.kernel.shape
         self.common_handler(rows, cols)

@@ -91,6 +91,10 @@ class ImGuiPlayground:
                 
                 # Display image
                 try:
+                    # TODO: Fix texture creation for numpy arrays
+                    # hello_imgui.image_from_asset is for file assets, not numpy arrays
+                    # Need to use proper texture creation API (imgui.ImTextureID with backend-specific code)
+                    # For now, this is a placeholder that needs testing in a real environment
                     texture = hello_imgui.image_from_asset(img_rgb)
                     imgui.image(texture, imgui.ImVec2(display_w, display_h))
                 except Exception as e:
