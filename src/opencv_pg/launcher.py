@@ -1,11 +1,9 @@
 import argparse
 import logging
 from pathlib import Path
+import webbrowser
 
-from qtpy import QtCore, QtWidgets
-
-from .doc_viewer import DocWindow
-from .main import MainWindow
+from .imgui_playground import run_imgui_playground
 from .pipeline_launcher import LOG_FORMAT
 
 ROBOT = "robot.jpg"
@@ -23,15 +21,14 @@ def run_playground(args):
     img_path = args.image
     if img_path is None:
         img_path = get_file_path(ROBOT)
-    app = QtWidgets.QApplication([])
-    m = MainWindow(img_path, args.no_docs, args.disable_info_widgets)
-    m.setAttribute(QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False)
-    m.show()
-    app.exec_()
+    
+    # Note: no_docs and disable_info_widgets options are currently not implemented
+    # in the ImGui version
+    run_imgui_playground(img_path)
 
 
 def docview():
-    """Launch a WebEngine to view docs"""
+    """Launch a browser to view docs"""
     parser = argparse.ArgumentParser("OpenCV DocView")
     parser.add_argument(
         "--template",
@@ -41,11 +38,13 @@ def docview():
     )
 
     args = parser.parse_args()
-
-    app = QtWidgets.QApplication([])
-    m = DocWindow(args.template)
-    m.show()
-    app.exec_()
+    
+    # Open doc in default browser
+    from opencv_pg.docs import doc_writer
+    doc_writer._create_rendered_docs()
+    doc_writer.render_local_doc(doc_writer.RENDERED_DIR, args.template)
+    doc_path = doc_writer.RENDERED_DIR.joinpath(args.template)
+    webbrowser.open(f'file://{doc_path}')
 
 
 def _validate_image_path(img_path):
